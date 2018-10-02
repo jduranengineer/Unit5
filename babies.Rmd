@@ -1,0 +1,150 @@
+---
+baietitle: "Babies"
+author: "Joanna Duran"
+date: "September 29, 2018"
+output: html_document
+---
+
+```
+baby<-read.table("C:/Users/JEngi/Desktop/Doing data science/yob2016.txt", sep=";", StringsAsFactors=FALSE)
+head(baby)
+df<-baby
+```
+*Give human readble names to columns
+```
+col<-c("Name", "Gender", "Amount")
+names(df)<-col
+
+```
+*Display summary and structure
+
+```
+summary(df)
+str(df)
+```
+*find name ending in 3 yyys
+* couldn't find the yyys, I tried this code and got this
+
+grep("yyy$", df)
+integer(0)
+grep("yy$", df)
+integer(0)
+grep("yy", df)
+[1] 1
+```
+```
+*Data Merging- import 2015 data
+
+
+```
+baby2<-read.table("C:/Users/JEngi/Desktop/Doing data science/yob2015.txt", sep=",", stringsAsFactors = FALSE)
+names(baby2)<-col
+y2015<-baby2
+```
+*Display last 10 rows
+```
+tail(y2015,10)
+```
+
+*the last 10 rows are all male names and the count are all 5
+
+*Merge 2015 and 2016
+
+```
+final<-merge(x=df, y=y2015, by="Name", all=TRUE)
+```
+*Couldn't get rid od NAs, I tried fslines like in the example and it cleared everything out
+```
+fslines<-which(final$`15Gen`=="NA")
+final<-final[(-1*fslines),]
+str(final)
+'data.frame':	0 obs. of  5 variables:
+ $ Name    : chr 
+ $ Gender.x: chr 
+ $ Amount.x: int 
+ $ Gender.y: chr 
+ $ Amount.y: int 
+```
+
+*Data Summary
+*make total 
+
+```
+names(final)[2:5]<-c("SxGen", "SxAmount","FfGen", "FfAmount")
+final$SxAmount<-as.numeric(final$SxAmount)
+final$FfAmount<-as.numeric(final$FfAmount)
+final$Total<- (final$SxAmount + final$FfAmount)
+```
+*Sort data by total I use this code
+```
+final2<-final[order("Total"),]
+```
+*and got all the data wiped out except the first entry
+
+```
+'data.frame':	1 obs. of  6 variables:
+ $ Name    : chr "Aaban"
+ $ SxGen   : chr "M"
+ $ SxAmount: num 9
+ $ FfGen   : chr "M"
+ $ FfAmount: num 15
+ $ Total   : num 24
+```
+ 
+*Also tried these and they didn't work
+
+```
+final[order(final$Total),]
+final[ with(final, order(Total)),]
+```
+*Both Methods gave me this output
+
+```
+  Name SxGen SxAmount FfGen FfAmount Total
+97        Aaliyahrose     F        5     F        5    10
+103          Aaliyiah     F        5     F        5    10
+110           Aamanee     F        5     F        5    10
+178          Aarilynn     F        5     F        5    10
+257            Aavash     M        5     M        5    10
+285           Aaziyah     F        5     F        5    10
+298              Abba     M        5     M        5    10
+340        Abdirashid     M        5     M        5    10
+428          Abhyuday     M        5     M        5    10
+516           Abriela     F        5     F        5    10
+```
+ *FINALLY this one worked
+``` 
+final <- final[with(final, order(-Total)), ]
+str(final)
+``` 
+ *Top 10 names are
+``` 
+head(final,10)
+ Name SxGen SxAmount FfGen FfAmount Total
+13219     Emma     F    19414     F    20415 39829
+32127   Olivia     F    19246     F    19638 38884
+31637     Noah     M    19015     M    19594 38609
+26094     Liam     M    18138     M    18330 36468
+37799   Sophia     F    16070     F    17381 33451
+5098       Ava     F    16237     F    16340 32577
+28595    Mason     M    15192     M    16591 31783
+41092  William     M    15668     M    15863 31531
+17585    Jacob     M    14416     M    15914 30330
+17093 Isabella     F    14722     F    15574 30296
+``` 
+*Top 10 female names are:
+``` 
+females<-final[final$SxGen=="F", c(1,2,6)]
+head(females,10)
+           Name SxGen Total
+13219      Emma     F 39829
+32127    Olivia     F 38884
+37799    Sophia     F 33451
+5098        Ava     F 32577
+17093  Isabella     F 30296
+29451       Mia     F 29237
+8743  Charlotte     F 24411
+446     Abigail     F 24070
+13190     Emily     F 22692
+15944    Harper     F 21016
+```
